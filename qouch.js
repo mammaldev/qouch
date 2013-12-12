@@ -9,12 +9,12 @@ function Qouch(url) {
   this.url = url;
 }
 
-Qouch.prototype.createDB = function(dbName) {
-  return this.request('PUT', dbName, {});
+Qouch.prototype.createDB = function() {
+  return this.request('PUT', null, {});
 };
 
-Qouch.prototype.deleteDB = function(dbName) {
-  return this.request('DELETE', dbName, {});
+Qouch.prototype.deleteDB = function() {
+  return this.request('DELETE', null, {});
 };
 
 Qouch.prototype.seq = function(_id) {
