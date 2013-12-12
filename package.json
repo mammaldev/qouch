@@ -11,6 +11,17 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Nick Cartwright (nick@mammal.io)",
-  "license": "BSD-2-Clause"
+  "author": {
+    "name": "Nick Cartwright",
+    "email": "nick@mammal.io",
+    "url": "http://mammal.io"
+  },
+  "license": {
+    "type": "MIT",
+    "url": "http://github.com/kriskowal/q/raw/master/LICENSE"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mammaldev/qouch.git"
+  }
 }
