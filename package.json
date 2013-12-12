@@ -1,0 +1,16 @@
+{
+  "name": "qouch",
+  "version": "0.0.0",
+  "description": "CouchDB via Q",
+  "main": "qouch.js",
+  "dependencies": {
+    "q": "~0.9.7",
+    "q-io": "~1.10.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Nick Cartwright (nick@mammal.io)",
+  "license": "BSD-2-Clause"
+}
