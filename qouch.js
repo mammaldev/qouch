@@ -151,6 +151,7 @@ Qouch.prototype.request = function(method, path, body) {
                                           buffer && buffer.toString().trim() ));
         e.requestOptions = opts;
         e.response = res;
+        e.httpStatusCode = res && res.status;
         throw e;
       }
       return JSON.parse(buffer.toString());
