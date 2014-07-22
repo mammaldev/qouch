@@ -100,6 +100,10 @@ Qouch.prototype.view = function(design, view, params) {
       method = 'POST';
       body = { keys: params.keys };
       delete params.keys;
+    } else if (params.rootKey) {
+      params.startkey = params.rootKey;
+      params.endkey = params.rootKey.concat({});
+      delete params.rootKey;
     }
 
     Object.keys(params).forEach(function(key) {
