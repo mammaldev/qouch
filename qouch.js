@@ -154,7 +154,7 @@ Qouch.prototype.request = function(method, path, body) {
     .then(function(buffer) {
       if ( isNaN(res.status) || res.status >= 400 ) {
         var msg = util.format('HTTP request failed with code %s  %s', res.status, buffer && buffer.toString().trim() )
-        throw new QouchRequestError(msg, dbURL, res && res.status, opts, res);
+        throw new QouchRequestError(msg, res && res.status, opts, res);
       }
       return JSON.parse(buffer.toString());
     });
