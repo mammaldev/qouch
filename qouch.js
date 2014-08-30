@@ -4,6 +4,8 @@ var Q = require('q');
 var http = require('q-io/http');
 
 module.exports = Qouch;
+Qouch.QouchRequestError = QouchRequestError;
+Qouch.QouchBulkError = QouchBulkError;
 
 function Qouch(url) {
   this.url = url;
@@ -70,18 +72,19 @@ Qouch.prototype.destroy = function(doc) {
 };
 
 Qouch.prototype.bulk = function(docs) {
+  var dbURL = this.url;
+
   return this.request('POST', '_bulk_docs', { docs: docs })
   .then(function(body) {
     var errors = body.filter(function(item) {
       return typeof item.error != 'undefined';
+    })
+    .map(function ( item ) {
+      return { _id: item.id, error: item.error };
     });
 
-    if (errors.length) {
-      var e = new Error('bulk errors');
-      e.docs = errors.map(function(item) {
-        return { _id: item.id, error: item.error };
-      });
-      throw e;
+    if ( errors.length ) {
+      throw new QouchBulkError(dbURL, errors, docs);
     }
 
     return body.map(function(item) {
@@ -149,16 +152,29 @@ Qouch.prototype.request = function(method, path, body) {
   .then(function(res) {
     return Q.post(res.body, 'read', [])
     .then(function(buffer) {
-      if (isNaN(res.status) || res.status >= 400) {
-        var e = new Error(  util.format(  'HTTP request failed with code %s  %s',
-                                          res.status,
-                                          buffer && buffer.toString().trim() ));
-        e.requestOptions = opts;
-        e.response = res;
-        e.httpStatusCode = res && res.status;
-        throw e;
+      if ( isNaN(res.status) || res.status >= 400 ) {
+        var msg = util.format('HTTP request failed with code %s  %s', res.status, buffer && buffer.toString().trim() )
+        throw new QouchRequestError(msg, dbURL, res && res.status, opts, res);
       }
       return JSON.parse(buffer.toString());
     });
   });
 };
+
+function QouchRequestError ( message, statusCode, requestOptions, response) {
+  this.message = message;
+  this.httpStatusCode = statusCode;
+  this.requestOptions = requestOptions;
+  this.response = response;
+}
+QouchRequestError.prototype = new Error();
+QouchRequestError.prototype.constructor = QouchRequestError;
+
+function QouchBulkError ( dbURL, itemErrors, requestBody ) {
+  this.message = 'Bulk Errors';
+  this.dbURL = dbURL;
+  this.itemErrors = itemErrors;
+  this.requestBody = requestBody;
+}
+QouchBulkError.prototype = new Error();
+QouchBulkError.prototype.constructor = QouchBulkError;
