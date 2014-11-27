@@ -16,10 +16,7 @@
     "email": "nick@mammal.io",
     "url": "http://mammal.io"
   },
-  "license": {
-    "type": "MIT",
-    "url": "http://github.com/kriskowal/q/raw/master/LICENSE"
-  },
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git://github.com/mammaldev/qouch.git"
