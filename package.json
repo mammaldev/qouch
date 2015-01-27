@@ -1,6 +1,6 @@
 {
   "name": "qouch",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "CouchDB via Q",
   "main": "qouch.js",
   "dependencies": {
