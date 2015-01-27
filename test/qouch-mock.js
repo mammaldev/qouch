@@ -32,6 +32,11 @@ function qouchMockFactory ( docs, designDocPaths ) {
   };
 
   QouchMock.prototype.get = function ( _id ) {
+    if ( !docCache[ _id ] ) {
+      return Q.when(
+          new Error('404 Doc Not Found')
+      );
+    }
     return Q.when(
         JSON.parse(JSON.stringify(docCache[ _id ]))
     );
@@ -140,25 +145,29 @@ function qouchMockFactory ( docs, designDocPaths ) {
       couchMap(allDocs);
       var matchedRows;
 
-      function matchKey ( row, key ) {
-        if ( Array.isArray(key) ) {
-          return row.key.every(function ( rowKey, ix ) {
-            return key[ix] && rowKey === key[ix];
+      function matchKey( baseKey, keyToMatch ) {
+        if ( Array.isArray(keyToMatch) && Array.isArray(baseKey) ) {
+          return baseKey.every(function ( rowKey, ix ) {
+            return keyToMatch[ix] && rowKey === keyToMatch[ix];
           });
         } else {
-          return key === row.key;
+          return keyToMatch === baseKey;
         }
       }
 
       if ( params.keys ) {
         matchedRows = rows.filter(function ( row ) {
           return params.keys.some(function ( key ) {
-            return matchKey(row, key);
+            return matchKey(row.key, key);
           });
         });
       } else if ( params.key ) {
         matchedRows = rows.filter(function ( row ) {
-          return matchKey(row, params.key);
+          return matchKey(row.key, params.key);
+        });
+      } else if ( params.rootKey ) {
+        matchedRows = rows.filter(function ( row ) {
+          return matchKey(params.rootKey, row.key);
         });
       } else if ( params.startKey || params.start_key ) {
         throw new Error('Not Implemented');
