@@ -40,7 +40,7 @@ Qouch.prototype.fetch = function(_ids) {
   });
 };
 
-Qouch.prototype.fetchAll = function ( params ) {
+Qouch.prototype.allDocs = Qouch.prototype.fetchAll = function ( params ) {
   params = params || {};
   params.include_docs = true;
 
