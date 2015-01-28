@@ -50,6 +50,13 @@ Qouch.prototype.allDocs = Qouch.prototype.fetchAll = function ( params ) {
   });
 };
 
+Qouch.prototype.designDocs = function () {
+  return this.allDocs({
+    startkey: '_design/',
+    endkey: '_design0'
+  });
+};
+
 Qouch.prototype.insert = function(doc) {
   return this.request('POST', null, doc)
   .then(function(body) {
