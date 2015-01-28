@@ -40,8 +40,11 @@ Qouch.prototype.fetch = function(_ids) {
   });
 };
 
-Qouch.prototype.fetchAll = function() {
-  return this.request('GET', '_all_docs?include_docs=true')
+Qouch.prototype.fetchAll = function ( params ) {
+  params = params || {};
+  params.include_docs = true;
+
+  return this.request('GET', '_all_docs' + genQueryString(params))
   .then(function(body) {
     return body.rows.map(function(row) { return row.doc; });
   });
