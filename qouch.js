@@ -96,7 +96,6 @@ Qouch.prototype.bulk = function(docs) {
 Qouch.prototype.view = function(design, view, params) {
   var method;
   var body;
-  var qs = '';
 
   if (params) {
     if (params.keys) {
@@ -108,15 +107,11 @@ Qouch.prototype.view = function(design, view, params) {
       params.endkey = params.rootKey.concat({});
       delete params.rootKey;
     }
-
-    Object.keys(params).forEach(function(key) {
-      qs += ( qs.length ? '&' : '?') + key + '=' + encodeURIComponent(JSON.stringify(params[key]) );
-    });
   }
 
   if (!method) method = 'GET';
 
-  var path = util.format('_design/%s/_view/%s%s', design, view, qs);
+  var path = util.format('_design/%s/_view/%s%s', design, view, genQueryString(params));
 
   return this.request(method, path, body)
   .then(function(body) {
@@ -178,3 +173,11 @@ function QouchBulkError ( dbURL, itemErrors, requestBody ) {
 }
 QouchBulkError.prototype = new Error();
 QouchBulkError.prototype.constructor = QouchBulkError;
+
+function genQueryString ( params ) {
+  var keys = params ? Object.keys(params) : [];
+
+  return keys.reduce(function ( qs, key, i ) {
+    return qs + ( i ? '&' : '?' ) + key + '=' + encodeURIComponent(JSON.stringify(params[ key ]));
+  }, '');
+}
