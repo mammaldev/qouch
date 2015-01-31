@@ -24,7 +24,7 @@ Qouch.prototype.activeTasks = function () {
   return http.read(this.serverURL + '_active_tasks').then(JSON.parse.bind(JSON));
 };
 
-Qouch.prototype.seq = function(_id) {
+Qouch.prototype.seq = function () {
   return http.read(this.url)
   .then(function(body) {
     return JSON.parse(body).update_seq;
