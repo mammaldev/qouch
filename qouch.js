@@ -7,8 +7,9 @@ module.exports = Qouch;
 Qouch.QouchRequestError = QouchRequestError;
 Qouch.QouchBulkError = QouchBulkError;
 
-function Qouch(url) {
+function Qouch( url ) {
   this.url = url;
+  this.serverURL = url.match(/^.*\/(?=[^/]+\/?$)/)[ 0 ];
 }
 
 Qouch.prototype.createDB = function() {
@@ -17,6 +18,10 @@ Qouch.prototype.createDB = function() {
 
 Qouch.prototype.deleteDB = function() {
   return this.request('DELETE', null, {});
+};
+
+Qouch.prototype.activeTasks = function () {
+  return http.read(this.serverURL + '_active_tasks').then(JSON.parse.bind(JSON));
 };
 
 Qouch.prototype.seq = function(_id) {
