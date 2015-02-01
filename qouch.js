@@ -7,9 +7,10 @@ module.exports = Qouch;
 Qouch.QouchRequestError = QouchRequestError;
 Qouch.QouchBulkError = QouchBulkError;
 
-function Qouch( url ) {
+function Qouch( url, httpAgent ) {
   this.url = url;
   this.serverURL = url.match(/^.*\/(?=[^/]+\/?$)/)[ 0 ];
+  this.httpAgent = httpAgent || http.globalAgent;
 }
 
 Qouch.prototype.createDB = function() {
@@ -21,18 +22,28 @@ Qouch.prototype.deleteDB = function() {
 };
 
 Qouch.prototype.activeTasks = function () {
-  return http.read(this.serverURL + '_active_tasks').then(JSON.parse.bind(JSON));
+  return http.read({
+    url: this.serverURL + '_active_tasks',
+    agent: this.httpAgent
+  })
+  .then(JSON.parse.bind(JSON));
 };
 
 Qouch.prototype.seq = function () {
-  return http.read(this.url)
+  return http.read({
+    url: this.url,
+    agent: this.httpAgent
+  })
   .then(function(body) {
     return JSON.parse(body).update_seq;
   });
 };
 
 Qouch.prototype.get = function(_id) {
-  return http.read(util.format('%s/%s', this.url, _id))
+  return http.read({
+    url: util.format('%s/%s', this.url, _id),
+    agent: this.httpAgent
+  })
   .then(function(body) {
     return JSON.parse(body);
   });
@@ -154,7 +165,8 @@ Qouch.prototype.request = function(method, path, body) {
     headers: {
       'content-type': 'application/json',
       'accepts': 'application/json'
-    }
+    },
+    agent: this.httpAgent
   };
   if (body) opts.body = [ JSON.stringify(body) ];
 
