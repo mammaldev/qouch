@@ -168,7 +168,9 @@ Qouch.prototype.request = function(method, path, body) {
     },
     agent: this.httpAgent
   };
-  if (body) opts.body = [ JSON.stringify(body) ];
+  if (body) {
+    opts.body = [ typeof body === 'string' ? body : JSON.stringify(body) ];
+  };
 
   return http.request(opts)
   .then(function(res) {
