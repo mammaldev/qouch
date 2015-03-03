@@ -130,12 +130,12 @@ function qouchMockFactory ( docs, designDocPaths ) {
             },
             doc: params.include_docs ? doc : undefined
           });
-          if ( docsToMap.length > 0 ) {
-            couchMap(docsToMap);
-          }
         }
         var mapFn = eval('(' + viewCode.map + ')');
         mapFn(doc);
+        if ( docsToMap.length > 0 ) {
+          couchMap(docsToMap);
+        }
       }
 
       var allDocs = Object.keys(docCache).map(function ( _id ) {
