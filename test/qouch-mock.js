@@ -172,7 +172,38 @@ function qouchMockFactory ( docs, designDocPaths ) {
       } else if ( params.startKey || params.start_key ) {
         throw new Error('Not Implemented');
       }
-      return matchedRows;
+      if ( !params.reduce || !matchedRows ) {
+        return matchedRows || [];
+      }
+
+      var reduceFn = eval('(' + viewCode.reduce + ')');
+
+      function sum( array ) {
+        return array.reduce(function ( sum, element ) {
+          return sum + element;
+        }, 0);
+      }
+
+      function count( array ) {
+        throw new Error('Not Implemented');
+      }
+
+      function stats( array ) {
+        throw new Error('Not Implemented');
+      }
+
+      var keys = matchedRows.map(function ( matchedRow ) {
+        return [ matchedRows.key, matchedRows.id ];
+      });
+
+      var values = matchedRows.map(function ( matchedRow ) {
+        return matchedRow.doc;
+      });
+
+      var firstReducedValues = reduceFn(keys.slice(0, matchedRows.length / 2), values.slice(0, matchedRows.length / 2), false);
+      var secondReducedValues = reduceFn(keys.slice(matchedRows.length / 2, matchedRows.length), matchedRows.slice(matchedRows.length / 2, matchedRows.length), false);
+      var finalReducedValue =  reduceFn(null, [ firstReducedValues, secondReducedValues ], true);
+      return [ { value: finalReducedValue } ];
     });
 
   };
