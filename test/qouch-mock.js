@@ -169,8 +169,44 @@ function qouchMockFactory ( docs, designDocPaths ) {
         matchedRows = rows.filter(function ( row ) {
           return matchKey(params.rootKey, row.key);
         });
-      } else if ( params.startKey || params.start_key ) {
-        throw new Error('Not Implemented');
+      } else if ( params.startkey || params.start_key || params.endkey || params.end_key ) {
+        var startKey = params.startkey ? params.startkey : params.start_key;
+        var endKey = params.endkey ? params.endkey : params.end_key;
+
+        rows.sort(function ( row1, row2 ) {
+          if ( !Array.isArray(row1.key) ) {
+            if ( row1.key < row2.key ) {
+              return 1;
+            }
+            if ( row1.key > row2.key ) {
+              return -1;
+            }
+            return 0;
+          }
+
+          for ( var i = 0; i < row1.key.length; i++ ) {
+            if ( row1.key[ i ] < row2.key[ i ] ) {
+              return -1;
+            }
+            if ( row1.key[ i ] > row2.key[ i ] ) {
+              return 1;
+            }
+          }
+          return 0;
+        });
+
+        matchedRows = rows.filter(function ( row ) {
+          if ( !Array.isArray(row.key) ) {
+            return row.key >= params.start_key && row.key <= params.end_key;
+          }
+
+          for ( i = 0; i < row.key.length; i++ ) {
+            if ( !( row.key[ i ] >= startKey[ i ] && row.key[ i ] <= endKey[ i ] ) ) {
+              return false;
+            }
+          }
+          return true;
+        });
       }
       if ( !params.reduce || !matchedRows ) {
         return matchedRows || [];
