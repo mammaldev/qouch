@@ -169,10 +169,77 @@ function qouchMockFactory ( docs, designDocPaths ) {
         matchedRows = rows.filter(function ( row ) {
           return matchKey(params.rootKey, row.key);
         });
-      } else if ( params.startKey || params.start_key ) {
+      } else if ( params.startkey || params.start_key || params.endkey || params.end_key ) {
+        var startKey = params.startkey ? params.startkey : params.start_key;
+        var endKey = params.endkey ? params.endkey : params.end_key;
+
+        rows.sort(function ( row1, row2 ) {
+          if ( !Array.isArray(row1.key) ) {
+            if ( row1.key < row2.key ) {
+              return 1;
+            }
+            if ( row1.key > row2.key ) {
+              return -1;
+            }
+            return 0;
+          }
+
+          for ( var i = 0; i < row1.key.length; i++ ) {
+            if ( row1.key[ i ] < row2.key[ i ] ) {
+              return -1;
+            }
+            if ( row1.key[ i ] > row2.key[ i ] ) {
+              return 1;
+            }
+          }
+          return 0;
+        });
+
+        matchedRows = rows.filter(function ( row ) {
+          if ( !Array.isArray(row.key) ) {
+            return row.key >= params.start_key && row.key <= params.end_key;
+          }
+
+          for ( i = 0; i < row.key.length; i++ ) {
+            if ( !( row.key[ i ] >= startKey[ i ] && row.key[ i ] <= endKey[ i ] ) ) {
+              return false;
+            }
+          }
+          return true;
+        });
+      }
+      if ( !params.reduce || !matchedRows ) {
+        return matchedRows || [];
+      }
+
+      var reduceFn = eval('(' + viewCode.reduce + ')');
+
+      function sum( array ) {
+        return array.reduce(function ( sum, element ) {
+          return sum + element;
+        }, 0);
+      }
+
+      function count( array ) {
         throw new Error('Not Implemented');
       }
-      return matchedRows;
+
+      function stats( array ) {
+        throw new Error('Not Implemented');
+      }
+
+      var keys = matchedRows.map(function ( matchedRow ) {
+        return [ matchedRows.key, matchedRows.id ];
+      });
+
+      var values = matchedRows.map(function ( matchedRow ) {
+        return matchedRow.doc;
+      });
+
+      var firstReducedValues = reduceFn(keys.slice(0, matchedRows.length / 2), values.slice(0, matchedRows.length / 2), false);
+      var secondReducedValues = reduceFn(keys.slice(matchedRows.length / 2, matchedRows.length), matchedRows.slice(matchedRows.length / 2, matchedRows.length), false);
+      var finalReducedValue =  reduceFn(null, [ firstReducedValues, secondReducedValues ], true);
+      return [ { value: finalReducedValue } ];
     });
 
   };
