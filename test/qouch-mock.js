@@ -121,14 +121,24 @@ function qouchMockFactory ( docs, designDocPaths ) {
       var rows = [];
       function couchMap ( docsToMap ) {
         var doc = docsToMap.shift();
-        function emit( key ) {
+        function emit( key, refDoc ) {
+          var docToSend;
+          if ( params.include_docs ) {
+            if ( refDoc && refDoc._id ) {
+              docToSend = docCache[ refDoc._id ];
+            } else {
+              docToSend = doc;
+            }
+          } else {
+            docToSend = undefined;
+          }
           rows.push({
             key: key,
             id: doc._id,
             value: {
               _rev: doc._rev
             },
-            doc: params.include_docs ? doc : undefined
+            doc: docToSend
           });
         }
         var mapFn = eval('(' + viewCode.map + ')');
