@@ -94,7 +94,7 @@ function qouchMockFactory ( docs, designDocPaths ) {
             designDocPaths.map(function ( docPath ) {
               return fs.read(docPath)
               .then(function ( content ) {
-                return eval('(' + content + ')');
+                return eval('( function () { return ' + content + '} )()');
               })
               .fail(function ( e ) {
                 e.message = '(' + docPath + ')\t' + e.message;
