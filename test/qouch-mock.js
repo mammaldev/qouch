@@ -210,7 +210,7 @@ function qouchMockFactory ( docs, designDocPaths ) {
             return row.key >= params.start_key && row.key <= params.end_key;
           }
 
-          for ( i = 0; i < row.key.length; i++ ) {
+          for ( var i = 0; i < row.key.length; i++ ) {
             if ( !( row.key[ i ] >= startKey[ i ] && row.key[ i ] <= endKey[ i ] ) ) {
               return false;
             }
