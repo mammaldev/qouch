@@ -211,7 +211,10 @@ function qouchMockFactory ( docs, designDocPaths ) {
           }
 
           for ( var i = 0; i < row.key.length; i++ ) {
-            if ( !( row.key[ i ] >= startKey[ i ] && row.key[ i ] <= endKey[ i ] ) ) {
+            if (
+              i < startKey.length &&
+              !( row.key[ i ] >= startKey[ i ] && row.key[ i ] <= endKey[ i ] )
+            ) {
               return false;
             }
           }
