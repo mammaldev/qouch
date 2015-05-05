@@ -123,22 +123,21 @@ function qouchMockFactory ( docs, designDocPaths ) {
         var doc = docsToMap.shift();
         function emit( key, refDoc ) {
           var docToSend;
-          if ( params.include_docs ) {
-            if ( refDoc && refDoc._id ) {
-              docToSend = docCache[ refDoc._id ];
-            } else {
-              docToSend = doc;
-            }
-          } else {
-            docToSend = undefined;
+          var valueToSend = refDoc || null;
+          var includeDocs = params.include_docs;
+
+          if ( includeDocs && ( refDoc && refDoc._id ) ) {
+            docToSend = docCache[ refDoc._id ];
+          } else if ( includeDocs ) {
+            docToSend = docCache[ doc._id ];
+          } else if ( refDoc ) {
+            docToSend = refDoc;
           }
           rows.push({
             key: key,
             id: doc._id,
-            value: {
-              _rev: doc._rev
-            },
-            doc: docToSend
+            value: valueToSend,
+            doc: includeDocs ? docToSend : undefined
           });
         }
         var mapFn = eval('(' + viewCode.map + ')');
