@@ -50,20 +50,15 @@ Qouch.prototype.get = function(_id) {
 };
 
 Qouch.prototype.fetch = function(_ids) {
-  return this.request('POST', '_all_docs?include_docs=true', { keys: _ids || [] })
-  .then(function(body) {
-    return body.rows.map(function(row) { return row.doc; });
-  });
+  return this.viewDocs(null, '_all_docs', { keys: _ids || [] });
 };
 
-Qouch.prototype.allDocs = Qouch.prototype.fetchAll = function ( params ) {
-  params = params || {};
-  params.include_docs = true;
+Qouch.prototype.fetchAll = function( params ) {
+  return this.viewDocs(null, '_all_docs', params)
+};
 
-  return this.request('GET', '_all_docs' + genQueryString(params))
-  .then(function(body) {
-    return body.rows.map(function(row) { return row.doc; });
-  });
+Qouch.prototype.allDocs = function ( params ) {
+  return this.view(null, '_all_docs', params);
 };
 
 Qouch.prototype.designDocs = function () {
@@ -135,9 +130,13 @@ Qouch.prototype.view = function(design, view, params) {
     }
   }
 
-  if (!method) method = 'GET';
+  method = method || 'GET';
 
-  var path = util.format('_design/%s/_view/%s%s', design, view, genQueryString(params));
+  var pathStart = ( view === '_all_docs' ) ?
+    '_all_docs' :
+    util.format('_design/%s/_view/%s', design, view);
+
+  var path = pathStart + genQueryString(params);
 
   return this.request(method, path, body)
   .then(function(body) {
@@ -146,7 +145,7 @@ Qouch.prototype.view = function(design, view, params) {
 };
 
 Qouch.prototype.viewDocs = function(design, view, params) {
-  if (!params) params = {};
+  params = params || {};
   params.reduce = false;
   params.include_docs = true;
 
