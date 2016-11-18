@@ -1,5 +1,5 @@
 var URL = require('url');
-var util = require('util');
+var format = require('util').format;
 var Q = require('q');
 var http = require('q-io/http');
 
@@ -41,7 +41,7 @@ Qouch.prototype.seq = function () {
 
 Qouch.prototype.get = function(_id) {
   return http.read({
-    url: util.format('%s/%s', this.url, _id),
+    url: format('%s/%s', this.url, _id),
     agent: this.httpAgent
   })
   .then(function(body) {
@@ -114,7 +114,7 @@ Qouch.prototype.bulk = function(docs) {
   });
 };
 
-Qouch.prototype.view = function(design, view, params) {
+Qouch.prototype.viewQuery = function(pathStart, params) {
   var method;
   var body;
 
@@ -132,13 +132,17 @@ Qouch.prototype.view = function(design, view, params) {
 
   method = method || 'GET';
 
-  var pathStart = ( view === '_all_docs' ) ?
-    '_all_docs' :
-    util.format('_design/%s/_view/%s', design, view);
-
   var path = pathStart + genQueryString(params);
 
-  return this.request(method, path, body)
+  return this.request(method, path, body);
+};
+
+Qouch.prototype.view = function(design, view, params) {
+  var pathStart = ( view === '_all_docs' ) ?
+    '_all_docs' :
+    format('_design/%s/_view/%s', design, view);
+
+  return this.viewQuery(pathStart, params)
   .then(function(body) {
     return body.rows;
   });
@@ -157,10 +161,15 @@ Qouch.prototype.viewDocs = function(design, view, params) {
   });
 };
 
+Qouch.prototype.list = function(design, list, view, params) {
+  var pathStart = format('_design/%s/_list/%s/%s', design, list, view);
+  return this.viewQuery(pathStart, params);
+};
+
 Qouch.prototype.request = function(method, path, body) {
   var opts = {
     method: method,
-    url: path ? util.format('%s/%s', this.url, path) : this.url,
+    url: path ? format('%s/%s', this.url, path) : this.url,
     headers: {
       'content-type': 'application/json',
       'accepts': 'application/json'
@@ -174,7 +183,7 @@ Qouch.prototype.request = function(method, path, body) {
     return Q.post(res.body, 'read', [])
     .then(function(buffer) {
       if ( isNaN(res.status) || res.status >= 400 ) {
-        var msg = util.format('HTTP request failed with code %s  %s', res.status, buffer && buffer.toString().trim() )
+        var msg = format('HTTP request failed with code %s  %s', res.status, buffer && buffer.toString().trim() )
         throw new QouchRequestError(msg, res && res.status, opts, res);
       }
       return JSON.parse(buffer.toString());
