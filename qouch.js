@@ -161,6 +161,7 @@ Qouch.prototype.viewDocs = function(design, view, params) {
   });
 };
 
+// N.B. view can be <Design>/<View>
 Qouch.prototype.list = function(design, list, view, params) {
   var pathStart = format('_design/%s/_list/%s/%s', design, list, view);
   return this.viewQuery(pathStart, params);
@@ -183,8 +184,8 @@ Qouch.prototype.request = function(method, path, body) {
     return Q.post(res.body, 'read', [])
     .then(function(buffer) {
       if ( isNaN(res.status) || res.status >= 400 ) {
-        var msg = format('HTTP request failed with code %s  %s', res.status, buffer && buffer.toString().trim() )
-        throw new QouchRequestError(msg, res && res.status, opts, res);
+        var msg = format('QouchRequestError %s', res.status);
+        throw new QouchRequestError(msg, res.status, opts, res);
       }
       return JSON.parse(buffer.toString());
     });
@@ -195,13 +196,12 @@ function QouchRequestError ( message, statusCode, requestOptions, response) {
   this.message = message;
   this.httpStatusCode = statusCode;
   this.requestOptions = requestOptions;
-  this.response = response;
 }
 QouchRequestError.prototype = new Error();
 QouchRequestError.prototype.constructor = QouchRequestError;
 
 function QouchBulkError ( dbURL, itemErrors, requestBody ) {
-  this.message = 'Bulk Errors';
+  this.message = 'QouchBulkError';
   this.dbURL = dbURL;
   this.itemErrors = itemErrors;
   this.requestBody = requestBody;
